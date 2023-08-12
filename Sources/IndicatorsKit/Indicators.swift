@@ -5,52 +5,58 @@
 //  Created by royal on 17/07/2022.
 //
 
-import Foundation
+import SwiftUI
+
+// MARK: - Indicators
 
 public final class Indicators: ObservableObject {
-	@Published public private(set) var activeIndicator: Indicator?
-
-	internal var timer: Timer?
+	@Published
+	public private(set) var indicators: [Indicator] = []
+	
+	internal var timers: [Indicator.ID: Timer] = [:]
 
 	public init() { }
 
-	@MainActor
 	public func display(_ indicator: Indicator) {
-		if activeIndicator?.id != indicator.id {
-			timer?.invalidate()
+		withAnimation {
+			indicators.append(indicator)
 		}
-
-		activeIndicator = indicator
-		updateTimer()
+		setupTimerIfNeeded(for: indicator)
 	}
 
-	@MainActor
-	public func dismiss() {
-		activeIndicator = nil
-		timer?.invalidate()
+	@inlinable @MainActor
+	public func dismiss(_ indicator: Indicator) {
+		dismiss(matching: indicator.id)
 	}
 
 	@MainActor
 	public func dismiss(matching id: String) {
-		if activeIndicator?.id == id {
-			dismiss()
+		guard let index = indicators.firstIndex(where: { $0.id == id }) else {
+			return
+		}
+		_ = withAnimation {
+			indicators.remove(at: index)
+		}
+		dismissTimerIfNeeded(for: id)
+	}
+}
+
+// MARK: - Indicators+Internal
+
+internal extension Indicators {
+	func setupTimerIfNeeded(for indicator: Indicator) {
+		if case .after(let time) = indicator.dismissType {
+			let timer = Timer.scheduledTimer(withTimeInterval: time, repeats: false) { _ in
+				Task { @MainActor [weak self] in
+					self?.dismiss(matching: indicator.id)
+				}
+			}
+			self.timers[indicator.id] = timer
 		}
 	}
 
-	internal func updateTimer() {
-		if case .after(let timeout) = activeIndicator?.dismissType {
-			let storedIndicator = activeIndicator
-
-			timer = Timer.scheduledTimer(withTimeInterval: timeout, repeats: false) { [weak self] _ in
-				guard let self else { return }
-				
-				// Check if activeIndicator is still the same as it was previously
-				Task { @MainActor in
-					if self.activeIndicator == storedIndicator {
-						self.dismiss()
-					}
-				}
-			}
-		}
+	func dismissTimerIfNeeded(for id: Indicator.ID) {
+		timers[id]?.invalidate()
+		timers[id] = nil
 	}
 }

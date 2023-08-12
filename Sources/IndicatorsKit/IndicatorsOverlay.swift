@@ -7,72 +7,78 @@
 
 import SwiftUI
 
+@available(iOS 17.0, *)
 public struct IndicatorsOverlay: View {
-	@ObservedObject var model: Indicators
-
-	@State var isExpanded: Bool = false
-	@State var dragOffset: CGSize = .zero
-
-	let dragInWrongDirectionMultiplier: Double = 0.015
-	let dragThreshold: Double = 20
-	let transition: AnyTransition = .asymmetric(insertion: .move(edge: .top), removal: .move(edge: .top).combined(with: .opacity))
-	let animation: Animation = .interpolatingSpring(mass: 0.5, stiffness: 45, damping: 45, initialVelocity: 15)
+	@Environment(\.ikEnableHaptics) private var enableHaptics
+	@ObservedObject private var model: Indicators
 
 	public init(model: Indicators) {
 		self.model = model
 	}
 
-	var dragGesture: some Gesture {
-		DragGesture()
-			.onChanged {
-				dragOffset.width = $0.translation.width * dragInWrongDirectionMultiplier
-				dragOffset.height = $0.translation.height < 0 ? $0.translation.height : $0.translation.height * dragInWrongDirectionMultiplier
-			}
-			.onEnded {
-				dragOffset = .zero
-
-				if $0.translation.height < dragThreshold {
-					// dismiss
-					model.dismiss()
-				} else if $0.translation.height > 0 {
-					// toggle expansion if possible
-					if let indicator = model.activeIndicator,
-					   indicator.expandedText != nil {
-						#if canImport(UIKit)
-						UIImpactFeedbackGenerator(style: .soft).impactOccurred()
-						#endif
-
-						isExpanded.toggle()
-						isExpanded ? model.timer?.invalidate() : model.updateTimer()
-					}
-				}
-			}
-	}
-
 	public var body: some View {
 		ZStack {
-			if let indicator = model.activeIndicator {
-				IndicatorView(indicator: indicator, isExpanded: $isExpanded)
-					.shadow(color: .black.opacity(0.115), radius: 10, x: 0, y: 0)
-					.offset(dragOffset)
-					.gesture(dragGesture)
-					.transition(transition)
-					.animation(animation, value: isExpanded)
+			ForEach(model.indicators) { indicator in
+				IndicatorView(
+					indicator: indicator,
+					onDismiss: { onDismiss(indicator) },
+					onExpandedToggle: { onExpandedToggle(indicator, isExpanded: $0) }
+				)
+				.padding(.horizontal)
+				.padding(.top, 6)
+				.transition(
+					.asymmetric(
+						insertion: .push(from: .top),
+						removal: .push(from: .bottom)
+					)
+				)
 			}
 		}
-		.frame(maxHeight: .infinity, alignment: .top)
-		.padding(.horizontal)
-		.padding(.top, 5)
-		.animation(animation, value: model.activeIndicator != nil)
-		.animation(animation, value: dragOffset)
 	}
 }
+
+// MARK: - IndicatorsOverlay+Support
+
+private extension IndicatorsOverlay {
+	func onExpandedToggle(_ indicator: Indicator, isExpanded: Bool) {
+		#if canImport(UIKit)
+		if enableHaptics {
+			UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+		}
+		#endif
+
+		isExpanded ? model.dismissTimerIfNeeded(for: indicator.id) : model.setupTimerIfNeeded(for: indicator)
+	}
+
+	func onDismiss(_ indicator: Indicator) {
+		model.dismiss(indicator)
+	}
+
+	func scale(for index: Int, indicatorsCount: Int) -> Double {
+		let indexFlipped = Double(indicatorsCount - index) - 1
+		return 1 - (indexFlipped * 0.2)
+	}
+}
+
+// MARK: - Previews
 
 struct IndicatorsOverlay_Previews: PreviewProvider {
 	static var previews: some View {
 		var model: Indicators {
 			let model = Indicators()
-			model.display(.init(id: "", icon: nil, headline: "Headline", dismissType: .manual))
+
+			for i in 0..<5 {
+				DispatchQueue.global().asyncAfter(deadline: .now() + (Double(i * 2))) {
+					let indicator = Indicator(id: UUID().uuidString,
+											  icon: "xmark",
+											  headline: "Headline \(i)",
+											  subheadline: "Subheadline",
+											  expandedText: "Expanded Text",
+											  dismissType: .manual)
+					model.display(indicator)
+				}
+			}
+
 			return model
 		}
 
