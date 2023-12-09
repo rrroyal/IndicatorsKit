@@ -11,17 +11,77 @@ import SwiftUI
 
 struct IndicatorView: View {
 	let indicator: Indicator
-	let onDismiss: () -> Void
-	let onExpandedToggle: (Bool) -> Void
+	let onDismiss: (() -> Void)?
+	let onExpandedToggle: ((Bool) -> Void)?
 
-	@State private var isExpanded: Bool = false
+	@Namespace private var animationNamespace
+
+	@State private var isPressed: Bool = false
+	@State private var isExpanded: Bool
 	@State private var dragOffset: CGSize = .zero
 
 	private let dragInWrongDirectionMultiplier: Double = 0.028
 	private let dragThreshold: Double = 20
+
+	private let backgroundShape: some Shape = RoundedRectangle(cornerRadius: 28, style: .circular)
+
+	private var minWidth: Double {
+		if indicator.subtitle != nil {
+			return 112
+		}
+		return 64
+	}
 	private let maxWidth: Double = 300
-	private let padding: Double = 10
-	private let backgroundShape: some Shape = RoundedRectangle(cornerRadius: 32, style: .circular)
+
+	private let spacingVertical: Double = 8
+	private var spacingHorizontal: Double {
+		if isExpanded {
+			return 4
+		}
+		if indicator.subtitle != nil {
+			return 14
+		}
+		return 6
+	}
+
+	private var paddingHorizontal: Double {
+		if isExpanded {
+			return paddingVertical
+		}
+		if indicator.subtitle != nil {
+			if indicator.icon != nil {
+				return 18
+			}
+			return 20
+		}
+		return 14
+	}
+	private var paddingVertical: Double {
+		if isExpanded {
+			return 18
+		}
+		if indicator.subtitle != nil {
+			return 10
+		}
+		return 10
+	}
+
+	private var iconFont: Font {
+		if isExpanded {
+			return titleFont
+		}
+		if indicator.subtitle != nil {
+			return .title2
+		}
+		return .footnote
+	}
+
+	private var titleFont: Font {
+		if isExpanded {
+			return .title3
+		}
+		return .footnote
+	}
 
 	private var dragGesture: some Gesture {
 		DragGesture()
@@ -30,78 +90,129 @@ struct IndicatorView: View {
 				dragOffset.height = $0.translation.height < 0 ? $0.translation.height : $0.translation.height * dragInWrongDirectionMultiplier
 			}
 			.onEnded {
-				withAnimation(.bouncy) {
+				withAnimation(.snappy) {
 					dragOffset = .zero
 				}
 
 				if $0.translation.height < dragThreshold {
-					// Dismiss
-					onDismiss()
-				} else if $0.translation.height > 0 {
+					onDismiss?()
+				} /* else if $0.translation.height > 0 {
 					if indicator.expandedText != nil {
-						isExpanded.toggle()
-						onExpandedToggle(isExpanded)
+						toggleExpansionIfPossible()
 					}
-				}
+				} */
 			}
 	}
 
+	init(
+		indicator: Indicator,
+		onDismiss: (() -> Void)? = nil,
+		onExpandedToggle: ((Bool) -> Void)? = nil
+	) {
+		self.indicator = indicator
+		self.onDismiss = onDismiss
+		self.onExpandedToggle = onExpandedToggle
+		self._isExpanded = .init(initialValue: false)
+	}
+
+	#if DEBUG
+	init(
+		indicator: Indicator,
+		onDismiss: (() -> Void)? = nil,
+		onExpandedToggle: ((Bool) -> Void)? = nil,
+		isExpanded: Bool = false
+	) {
+		self.indicator = indicator
+		self.onDismiss = onDismiss
+		self.onExpandedToggle = onExpandedToggle
+		self._isExpanded = .init(initialValue: isExpanded)
+	}
+	#endif
+
 	var body: some View {
-		HStack {
-			if let icon = indicator.icon {
-				Image(systemName: icon)
-					.font(indicator.subheadline != nil ? .title3 : .footnote)
-					.symbolVariant(indicator.style.iconVariants)
-					.foregroundStyle(indicator.style.iconStyle)
-					.foregroundColor(indicator.style.iconColor)
-					.contentTransition(.opacity)
-					.geometryGroup()
-			}
-
-			VStack {
-				Text(indicator.headline)
-					.font(.footnote)
-					.fontWeight(.medium)
-					.geometryGroup()
-					.lineLimit(isExpanded ? 2 : 1)
-					.foregroundStyle(indicator.style.headlineStyle)
-					.foregroundColor(indicator.style.headlineColor)
-					.contentTransition(.opacity)
-					.geometryGroup()
-
-				ZStack {
-					Group {
-						if !isExpanded, let content = indicator.subheadline {
-							Text(content)
-						}
-
-						if isExpanded, let content = indicator.expandedText {
-							Text(content)
-						}
-					}
-					.font(.footnote)
-					.fontWeight(.medium)
-					.geometryGroup()
-					.lineLimit(isExpanded ? nil : 2)
-					.foregroundStyle(indicator.style.subheadlineStyle)
-					.foregroundColor(indicator.style.subheadlineColor)
-					.transition(.scale(scale: 0.8).combined(with: .opacity))
+		VStack(spacing: spacingVertical) {
+			HStack(spacing: spacingHorizontal) {
+				if let icon = indicator.icon {
+					Image(systemName: icon)
+						.font(iconFont)
+						.fontWeight(.medium)
+						.foregroundStyle(indicator.style.iconStyle)
+						.foregroundColor(indicator.style.tintColor)
+						.symbolRenderingMode(.hierarchical)
+						.geometryGroup()
+						.id(ViewID.iconView)
 				}
+
+				VStack {
+					Text(indicator.title)
+						.font(titleFont)
+						.fontWeight(.medium)
+						.lineLimit(isExpanded ? 2 : 1)
+						.foregroundStyle(.primary)
+						.foregroundColor(indicator.style.tintColor)
+						.geometryGroup()
+						.frame(
+							maxWidth: isExpanded ? .infinity : nil,
+							alignment: isExpanded ? .leading : .center
+						)
+						.id(ViewID.titleLabel)
+
+					if !isExpanded, let content = indicator.subtitle {
+						Text(content)
+							.font(.footnote)
+							.fontWeight(.medium)
+							.lineLimit(2)
+							.foregroundStyle(.secondary)
+							.geometryGroup()
+							.matchedGeometryEffect(
+								id: AnimationID.subtitleOrExpandedTextLabel,
+								in: animationNamespace,
+								properties: .position,
+								anchor: .topLeading
+							)
+							.transition(.opacity)
+							.id(ViewID.subtitleLabel)
+					}
+				}
+				.multilineTextAlignment(isExpanded ? .leading : .center)
 			}
-			.padding(.trailing, indicator.icon != nil ? padding : 0)
-			.padding(.horizontal, indicator.subheadline != nil ? padding : 0)
-			.multilineTextAlignment(.center)
+
+			if isExpanded, let content = indicator.expandedText {
+				Text(content)
+					.font(.footnote)
+					.fontWeight(.medium)
+					.foregroundStyle(.secondary)
+					.frame(maxWidth: .infinity, alignment: .leading)
+					.geometryGroup()
+					.matchedGeometryEffect(
+						id: AnimationID.subtitleOrExpandedTextLabel,
+						in: animationNamespace,
+						properties: .position,
+						anchor: .topLeading
+					)
+					.transition(.scale(scale: 0.8).combined(with: .opacity))
+					.id(ViewID.expandedContentLabel)
+			}
 		}
-		.padding(padding)
-		.padding(.horizontal, padding)
+		.padding(.horizontal, paddingHorizontal)
+		.padding(.vertical, paddingVertical)
+		.frame(minWidth: minWidth)
 		.background(.regularMaterial, in: backgroundShape)
-		.frame(maxWidth: isExpanded ? nil : maxWidth, alignment: .center)
 		.mask(backgroundShape)
-		.shadow(color: .black.opacity(0.098), radius: 8, x: 0, y: 0)
-		.animation(.spring, value: isExpanded)
-		.optionalTapGesture(indicator.onTap)
+		.scaleEffect(isPressed ? 0.96 : 1)
 		.offset(dragOffset)
+		.shadow(color: .black.opacity(0.14), radius: 10, x: 0, y: 0)
+		.opacity(isPressed ? 0.8 : 1)
 		.gesture(dragGesture)
+		.animation(.spring, value: isExpanded)
+		.animation(.spring, value: isPressed)
+		.onLongPressGesture(minimumDuration: 0) {
+			didTapIndicator()
+		} onPressingChanged: {
+			if indicator.action != nil {
+				self.isPressed = $0
+			}
+		}
 	}
 }
 
@@ -111,56 +222,74 @@ extension IndicatorView: Identifiable {
 	var id: String { indicator.id }
 }
 
-// MARK: - Previews
+// MARK: - IndicatorView+Private
 
-/*
-struct IndicatorView_Previews: PreviewProvider {
-	static let isExpanded: Binding<Bool> = .constant(false)
-
-	static var previews: some View {
-		Group {
-			IndicatorView(indicator: .init(id: "",
-										   icon: nil,
-										   headline: "Headline",
-										   dismissType: .manual),
-						  isExpanded: isExpanded)
-			.previewDisplayName("Basic")
-
-			IndicatorView(indicator: .init(id: "",
-										   icon: "bolt.fill",
-										   headline: "Headline",
-										   dismissType: .manual),
-						  isExpanded: isExpanded)
-			.previewDisplayName("Icon")
-
-			IndicatorView(indicator: .init(id: "",
-										   headline: "Headline",
-										   subheadline: "Subheadline",
-										   dismissType: .manual),
-						  isExpanded: isExpanded)
-			.previewDisplayName("Subheadline")
-
-			IndicatorView(indicator: .init(id: "",
-										   icon: "bolt.fill",
-										   headline: "Headline",
-										   subheadline: "Subheadline",
-										   dismissType: .manual),
-						  isExpanded: isExpanded)
-			.previewDisplayName("Subheadline with icon")
-
-			IndicatorView(indicator: .init(id: "",
-										   icon: "bolt.fill",
-										   headline: "Headline",
-										   subheadline: "Subheadline",
-										   dismissType: .manual,
-										   style: .init(subheadlineColor: .red, iconColor: .red)),
-						  isExpanded: isExpanded)
-			.previewDisplayName("Full colored")
+private extension IndicatorView {
+	func toggleExpansionIfPossible() {
+		guard indicator.expandedText != nil else {
+			return
 		}
-		.previewLayout(.sizeThatFits)
-		.padding()
-		//		.background(Color(uiColor: .systemBackground))
-		.environment(\.colorScheme, .light)
+
+		isExpanded.toggle()
+		onExpandedToggle?(isExpanded)
+	}
+
+	func didTapIndicator() {
+		guard let action = indicator.action else {
+			return
+		}
+		switch action {
+		case .toggleExpansion:
+			toggleExpansionIfPossible()
+		case .execute(let actionToExecute):
+			actionToExecute()
+		}
 	}
 }
-*/
+
+// MARK: - IndicatorView+ViewID
+
+private extension IndicatorView {
+	enum ViewID: String {
+		case iconView = "IconView"
+		case titleLabel = "TitleLabel"
+		case subtitleLabel = "SubtitleLabel"
+		case expandedContentLabel = "ExpandedContentLabel"
+	}
+}
+
+// MARK: - IndicatorView+AnimationID
+
+private extension IndicatorView {
+	enum AnimationID: String {
+		case subtitleOrExpandedTextLabel = "SubtitleOrExpandedTextLabel"
+	}
+}
+
+// MARK: - Previews
+
+#if DEBUG
+#Preview("Title", traits: .sizeThatFitsLayout) {
+	IndicatorView(indicator: .title)
+}
+
+#Preview("Icon + Title", traits: .sizeThatFitsLayout) {
+	IndicatorView(indicator: .titleIcon)
+}
+
+#Preview("Title + Subtitle", traits: .sizeThatFitsLayout) {
+	IndicatorView(indicator: .titleSubtitleExpanded)
+}
+
+#Preview("Icon + Title + Subtitle", traits: .sizeThatFitsLayout) {
+	IndicatorView(indicator: .titleSubtitleExpandedIcon)
+}
+
+#Preview("Title + Subtitle (Expanded)", traits: .sizeThatFitsLayout) {
+	IndicatorView(indicator: .titleSubtitleExpanded, isExpanded: true)
+}
+
+#Preview("Icon + Title + Subtitle (Expanded)", traits: .sizeThatFitsLayout) {
+	IndicatorView(indicator: .titleSubtitleExpandedIcon, isExpanded: true)
+}
+#endif
