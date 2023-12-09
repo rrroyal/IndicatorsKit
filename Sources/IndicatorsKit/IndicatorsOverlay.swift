@@ -25,7 +25,7 @@ public struct IndicatorsOverlay: View {
 					onExpandedToggle: { onExpandedToggle(indicator, isExpanded: $0) }
 				)
 				.padding(.horizontal)
-				.padding(.top, 6)
+				.padding(.top, 4)
 				.transition(
 					.asymmetric(
 						insertion: .push(from: .top),
@@ -34,10 +34,11 @@ public struct IndicatorsOverlay: View {
 				)
 			}
 		}
+		.id(ViewID.indicatorsOverlayView)
 	}
 }
 
-// MARK: - IndicatorsOverlay+Support
+// MARK: - IndicatorsOverlay+Private
 
 private extension IndicatorsOverlay {
 	func onExpandedToggle(_ indicator: Indicator, isExpanded: Bool) {
@@ -47,7 +48,7 @@ private extension IndicatorsOverlay {
 		}
 		#endif
 
-		isExpanded ? model.dismissTimerIfNeeded(for: indicator.id) : model.setupTimerIfNeeded(for: indicator)
+		isExpanded ? model.dismissTimer(for: indicator.id) : model.setupTimerIfNeeded(for: indicator)
 	}
 
 	func onDismiss(_ indicator: Indicator) {
@@ -60,30 +61,19 @@ private extension IndicatorsOverlay {
 	}
 }
 
-// MARK: - Previews
+// MARK: - IndicatorsOverlay+ViewID
 
-struct IndicatorsOverlay_Previews: PreviewProvider {
-	static var previews: some View {
-		var model: Indicators {
-			let model = Indicators()
-
-			for i in 0..<5 {
-				DispatchQueue.global().asyncAfter(deadline: .now() + (Double(i * 2))) {
-					let indicator = Indicator(id: UUID().uuidString,
-											  icon: "xmark",
-											  headline: "Headline \(i)",
-											  subheadline: "Subheadline",
-											  expandedText: "Expanded Text",
-											  dismissType: .manual)
-					model.display(indicator)
-				}
-			}
-
-			return model
-		}
-
-		return Text("")
-			.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-			.indicatorOverlay(model: model)
+private extension IndicatorsOverlay {
+	enum ViewID: String {
+		case indicatorsOverlayView = "IndicatorsOverlayView"
 	}
 }
+
+// MARK: - Previews
+
+#if DEBUG
+#Preview {
+	IndicatorsOverlay(model: .preview(.titleSubtitleExpandedIcon, timeout: 1))
+		.frame(maxHeight: .infinity, alignment: .top)
+}
+#endif

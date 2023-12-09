@@ -10,10 +10,17 @@ let package = Package(
 		.macOS(.v14)
 	],
 	products: [
-		.library(name: "IndicatorsKit", targets: ["IndicatorsKit"])
+		.library(
+			name: "IndicatorsKit",
+			targets: ["IndicatorsKit"]
+		)
 	],
 	dependencies: [],
 	targets: [
-		.target(name: "IndicatorsKit", dependencies: [])
+		.target(
+			name: "IndicatorsKit",
+			dependencies: [],
+			exclude: ["../../Documentation"]
+		)
 	]
 )
