@@ -36,7 +36,7 @@ struct IndicatorView: View {
 	private let spacingVertical: Double = 8
 	private var spacingHorizontal: Double {
 		if isExpanded {
-			return 4
+			return 6
 		}
 		if indicator.subtitle != nil {
 			return 14
@@ -49,7 +49,7 @@ struct IndicatorView: View {
 			return paddingVertical
 		}
 		if indicator.subtitle != nil {
-			return 22
+			return 26
 		}
 		return 14
 	}
@@ -58,7 +58,7 @@ struct IndicatorView: View {
 			return 18
 		}
 		if indicator.subtitle != nil {
-			return 10
+			return 12
 		}
 		return 10
 	}
@@ -93,11 +93,11 @@ struct IndicatorView: View {
 
 				if $0.translation.height < dragThreshold {
 					onDismiss?()
-				} /* else if $0.translation.height > 0 {
+				} else if $0.translation.height > 0 {
 					if indicator.expandedText != nil {
 						toggleExpansionIfPossible()
 					}
-				} */
+				}
 			}
 	}
 
@@ -141,7 +141,7 @@ struct IndicatorView: View {
 								.foregroundStyle(indicator.style.iconStyle)
 								.foregroundColor(indicator.style.tintColor)
 								.symbolRenderingMode(.hierarchical)
-								.geometryGroup()
+//								.geometryGroup()
 						case .progressIndicator:
 							ProgressView()
 						}
@@ -157,7 +157,7 @@ struct IndicatorView: View {
 						.lineLimit(isExpanded ? 2 : 1)
 						.foregroundStyle(.primary)
 						.foregroundColor(indicator.style.tintColor)
-						.geometryGroup()
+//						.geometryGroup()
 						.frame(
 							maxWidth: isExpanded ? .infinity : nil,
 							alignment: isExpanded ? .leading : .center
@@ -170,14 +170,14 @@ struct IndicatorView: View {
 							.fontWeight(.medium)
 							.lineLimit(2)
 							.foregroundStyle(.secondary)
-							.geometryGroup()
+//							.geometryGroup()
 							.matchedGeometryEffect(
 								id: AnimationID.subtitleOrExpandedTextLabel,
 								in: animationNamespace,
 								properties: .position,
 								anchor: .topLeading
 							)
-							.transition(.opacity)
+							.transition(.blurReplace)
 							.id(ViewID.subtitleLabel)
 					}
 				}
@@ -190,14 +190,14 @@ struct IndicatorView: View {
 					.fontWeight(.medium)
 					.foregroundStyle(.secondary)
 					.frame(maxWidth: .infinity, alignment: .leading)
-					.geometryGroup()
+//					.geometryGroup()
 					.matchedGeometryEffect(
 						id: AnimationID.subtitleOrExpandedTextLabel,
 						in: animationNamespace,
 						properties: .position,
 						anchor: .topLeading
 					)
-					.transition(.scale(scale: 0.8).combined(with: .opacity))
+					.transition(.blurReplace)
 					.id(ViewID.expandedContentLabel)
 			}
 		}

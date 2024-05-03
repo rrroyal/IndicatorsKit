@@ -18,12 +18,14 @@ public struct IndicatorsOverlay: View {
 
 	public var body: some View {
 		ZStack {
-			ForEach(model.indicators) { indicator in
+			let indicatorsCount = model.indicators.count
+			ForEach(Array(model.indicators.enumerated()), id: \.element.id) { index, indicator in
 				IndicatorView(
 					indicator: indicator,
 					onDismiss: { onDismiss(indicator) },
 					onExpandedToggle: { onExpandedToggle(indicator, isExpanded: $0) }
 				)
+				.scaleEffect(scale(for: index, indicatorsCount: indicatorsCount))
 				.padding(.horizontal)
 				.padding(.top, 4)
 				.transition(
@@ -32,6 +34,7 @@ public struct IndicatorsOverlay: View {
 						removal: .push(from: .bottom)
 					)
 				)
+				.zIndex(Double(index))
 			}
 		}
 		.id(ViewID.indicatorsOverlayView)
@@ -48,7 +51,11 @@ private extension IndicatorsOverlay {
 		}
 		#endif
 
-		isExpanded ? model.dismissTimer(for: indicator.id) : model.setupTimerIfNeeded(for: indicator)
+		if isExpanded {
+			model.dismissTimer(for: indicator.id)
+		} else {
+			model.setupTimerIfNeeded(for: indicator)
+		}
 	}
 
 	func onDismiss(_ indicator: Indicator) {
@@ -73,7 +80,16 @@ private extension IndicatorsOverlay {
 
 #if DEBUG
 #Preview {
-	IndicatorsOverlay(model: .preview(.titleSubtitleExpandedIcon, timeout: 1))
+	IndicatorsOverlay(
+		model: .preview(
+			indicators: [
+				.init(id: "i1", icon: .progressIndicator, title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .manual),
+				.init(id: "i1", icon: .systemImage("command"), title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .automatic),
+				.init(id: "i2", icon: .progressIndicator, title: "Indicator 2", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .manual),
+				.init(id: "i2", icon: .systemImage("command"), title: "Indicator 2", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .automatic),
+			]
+		)
+	)
 		.frame(maxHeight: .infinity, alignment: .top)
 }
 #endif

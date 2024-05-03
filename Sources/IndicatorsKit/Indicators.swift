@@ -50,13 +50,14 @@ public final class Indicators: ObservableObject {
 
 internal extension Indicators {
 	func setupTimerIfNeeded(for indicator: Indicator) {
+		self.timers[indicator.id]?.invalidate()
+
 		if case .after(let time) = indicator.dismissType {
 			let timer = Timer.scheduledTimer(withTimeInterval: time, repeats: false) { _ in
 				Task { @MainActor [weak self] in
 					self?.dismiss(indicator)
 				}
 			}
-			self.timers[indicator.id]?.invalidate()
 			self.timers[indicator.id] = timer
 		}
 	}
@@ -71,12 +72,14 @@ internal extension Indicators {
 
 #if DEBUG
 internal extension Indicators {
-	static func preview(_ indicator: Indicator = .titleSubtitleExpandedIcon, timeout: TimeInterval? = 0) -> Indicators {
+	static func preview(indicators: [Indicator] = [.titleSubtitleExpandedIcon], interval: TimeInterval = 2) -> Indicators {
 		let model = Indicators()
 
-		if let timeout {
-			DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
+		Task {
+			try? await Task.sleep(for: .seconds(interval))
+			for indicator in indicators {
 				model.display(indicator)
+				try? await Task.sleep(for: .seconds(interval))
 			}
 		}
 
