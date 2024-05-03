@@ -130,15 +130,24 @@ struct IndicatorView: View {
 		VStack(spacing: spacingVertical) {
 			HStack(spacing: spacingHorizontal) {
 				if let icon = indicator.icon {
-					Image(systemName: icon)
-						.font(iconFont)
-						.fontWeight(.medium)
-						.foregroundStyle(indicator.style.iconStyle)
-						.foregroundColor(indicator.style.tintColor)
-						.symbolRenderingMode(.hierarchical)
-						.geometryGroup()
-						.padding(.leading, -2)
-						.id(ViewID.iconView)
+					Group {
+						switch icon {
+						case .image(let image):
+							image
+						case .systemImage(let systemName):
+							Image(systemName: systemName)
+								.font(iconFont)
+								.fontWeight(.medium)
+								.foregroundStyle(indicator.style.iconStyle)
+								.foregroundColor(indicator.style.tintColor)
+								.symbolRenderingMode(.hierarchical)
+								.geometryGroup()
+						case .progressIndicator:
+							ProgressView()
+						}
+					}
+					.padding(.leading, -2)
+					.id(ViewID.iconView)
 				}
 
 				VStack {

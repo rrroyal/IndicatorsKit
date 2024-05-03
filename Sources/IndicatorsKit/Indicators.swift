@@ -53,7 +53,7 @@ internal extension Indicators {
 		if case .after(let time) = indicator.dismissType {
 			let timer = Timer.scheduledTimer(withTimeInterval: time, repeats: false) { _ in
 				Task { @MainActor [weak self] in
-					self?.dismiss(with: indicator.id)
+					self?.dismiss(indicator)
 				}
 			}
 			self.timers[indicator.id]?.invalidate()

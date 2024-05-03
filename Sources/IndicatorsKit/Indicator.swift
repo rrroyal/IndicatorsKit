@@ -12,7 +12,7 @@ import SwiftUI
 public struct Indicator {
 	public let id: String
 
-	public var icon: String?
+	public var icon: Icon?
 	public var title: String
 	public var subtitle: String?
 	public var expandedText: String?
@@ -22,7 +22,7 @@ public struct Indicator {
 
 	public init(
 		id: String,
-		icon: String? = nil,
+		icon: Icon? = nil,
 		title: String,
 		subtitle: String? = nil,
 		expandedText: String? = nil,
@@ -60,16 +60,22 @@ extension Indicator: Hashable {
 // MARK: - Indicator+
 
 public extension Indicator {
-	enum DismissType {
+	enum ActionStyle {
+		case toggleExpansion
+		case execute(() -> Void)
+	}
+
+	enum DismissType: Equatable {
 		case manual
 		case after(TimeInterval)
 
 		public static let automatic: DismissType = .after(5)
 	}
 
-	enum ActionStyle {
-		case toggleExpansion
-		case execute(() -> Void)
+	enum Icon {
+		case image(Image)
+		case systemImage(String)
+		case progressIndicator
 	}
 
 	struct Style {
@@ -97,7 +103,7 @@ public extension Indicator {
 #if DEBUG
 internal extension Indicator {
 	private static let _id = "id"
-	private static let _icon = "command"
+	private static let _icon = Icon.systemImage("command")
 	private static let _title = "Title"
 	private static let _subtitle = "Subtitle"
 	private static let _expandedText = "Expanded text, that will be longer. It could be a readable description of some error, or some other longer tooltip. The choice is yours."
