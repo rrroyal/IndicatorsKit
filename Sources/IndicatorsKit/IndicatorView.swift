@@ -144,6 +144,9 @@ struct IndicatorView: View {
 //								.geometryGroup()
 						case .progressIndicator:
 							ProgressView()
+								#if os(macOS)
+								.controlSize(.small)
+								#endif
 						}
 					}
 					.padding(.leading, -2)

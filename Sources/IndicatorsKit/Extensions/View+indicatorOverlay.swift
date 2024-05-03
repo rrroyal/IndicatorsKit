@@ -8,7 +8,11 @@
 import SwiftUI
 
 public extension View {
-	func indicatorOverlay(model: Indicators, alignment: Alignment = .top) -> some View {
-		overlay(IndicatorsOverlay(model: model), alignment: alignment)
+	func indicatorOverlay(
+		model: Indicators,
+		alignment: Alignment = .top,
+		insets: EdgeInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
+	) -> some View {
+		overlay(IndicatorsOverlay(model: model, insets: insets), alignment: alignment)
 	}
 }

@@ -10,10 +10,15 @@ import SwiftUI
 @available(iOS 17.0, *)
 public struct IndicatorsOverlay: View {
 	@Environment(\.ikEnableHaptics) private var enableHaptics
-	@ObservedObject private var model: Indicators
+	@Bindable private var model: Indicators
+	var insets: EdgeInsets
 
-	public init(model: Indicators) {
+	public init(
+		model: Indicators,
+		insets: EdgeInsets = .init(top: 0, leading: 0, bottom: 0, trailing: 0)
+	) {
 		self.model = model
+		self.insets = insets
 	}
 
 	public var body: some View {
@@ -27,7 +32,7 @@ public struct IndicatorsOverlay: View {
 				)
 				.scaleEffect(scale(for: index, indicatorsCount: indicatorsCount))
 				.padding(.horizontal)
-				.padding(.top, 4)
+				.padding(insets)
 				.transition(
 					.asymmetric(
 						insertion: .push(from: .top),
@@ -58,6 +63,7 @@ private extension IndicatorsOverlay {
 		}
 	}
 
+	@MainActor
 	func onDismiss(_ indicator: Indicator) {
 		model.dismiss(indicator)
 	}

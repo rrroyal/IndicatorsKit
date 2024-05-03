@@ -9,10 +9,11 @@ import SwiftUI
 
 // MARK: - Indicators
 
-public final class Indicators: ObservableObject {
+@Observable
+public final class Indicators {
 	internal static let animation: Animation = .spring
 
-	@Published public private(set) var indicators: [Indicator] = []
+	public private(set) var indicators: [Indicator] = []
 
 	internal var timers: [Indicator.ID: Timer] = [:]
 
