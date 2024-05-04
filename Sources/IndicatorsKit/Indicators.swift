@@ -11,7 +11,7 @@ import SwiftUI
 
 @Observable
 public final class Indicators {
-	internal static let animation: Animation = .spring
+	internal static let animation: Animation = .smooth
 
 	public private(set) var indicators: [Indicator] = []
 
@@ -77,7 +77,7 @@ internal extension Indicators {
 		let model = Indicators()
 
 		Task {
-			try? await Task.sleep(for: .seconds(interval))
+			try? await Task.sleep(for: .seconds(1))
 			for indicator in indicators {
 				model.display(indicator)
 				try? await Task.sleep(for: .seconds(interval))

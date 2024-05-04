@@ -28,15 +28,15 @@ public struct IndicatorsOverlay: View {
 				IndicatorView(
 					indicator: indicator,
 					onDismiss: { onDismiss(indicator) },
-					onExpandedToggle: { onExpandedToggle(indicator, isExpanded: $0) }
+					onToggleExpansion: { onToggleExpansion(indicator, isExpanded: $0) }
 				)
 				.scaleEffect(scale(for: index, indicatorsCount: indicatorsCount))
 				.padding(.horizontal)
 				.padding(insets)
 				.transition(
 					.asymmetric(
-						insertion: .push(from: .top),
-						removal: .push(from: .bottom)
+						insertion: .move(edge: .top),
+						removal: .move(edge: .top).combined(with: .opacity)
 					)
 				)
 				.zIndex(Double(index))
@@ -49,7 +49,7 @@ public struct IndicatorsOverlay: View {
 // MARK: - IndicatorsOverlay+Private
 
 private extension IndicatorsOverlay {
-	func onExpandedToggle(_ indicator: Indicator, isExpanded: Bool) {
+	func onToggleExpansion(_ indicator: Indicator, isExpanded: Bool) {
 		#if canImport(UIKit)
 		if enableHaptics {
 			UIImpactFeedbackGenerator(style: .soft).impactOccurred()
@@ -90,12 +90,16 @@ private extension IndicatorsOverlay {
 		model: .preview(
 			indicators: [
 				.init(id: "i1", icon: .progressIndicator, title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .manual),
-				.init(id: "i1", icon: .systemImage("command"), title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .automatic),
+				.init(id: "i1", icon: .systemImage("rectangle.arrowtriangle.2.inward"), title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .automatic),
 				.init(id: "i2", icon: .progressIndicator, title: "Indicator 2", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .manual),
-				.init(id: "i2", icon: .systemImage("command"), title: "Indicator 2", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .automatic),
+				.init(id: "i2", icon: .systemImage("rectangle.arrowtriangle.2.inward"), title: "Indicator 2", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .automatic),
 			]
 		)
 	)
-		.frame(maxHeight: .infinity, alignment: .top)
+	#if os(iOS)
+	.frame(maxHeight: .infinity, alignment: .top)
+	#elseif os(macOS)
+	.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+	#endif
 }
 #endif

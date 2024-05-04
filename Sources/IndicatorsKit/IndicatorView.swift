@@ -10,15 +10,16 @@ import SwiftUI
 // MARK: - IndicatorView
 
 struct IndicatorView: View {
-	let indicator: Indicator
-	let onDismiss: (() -> Void)?
-	let onExpandedToggle: ((Bool) -> Void)?
+	var indicator: Indicator
+	var onDismiss: (() -> Void)?
+	var onToggleExpansion: ((Bool) -> Void)?
 
 	@Namespace private var animationNamespace
 
-	@State private var isPressed: Bool = false
-	@State private var isExpanded: Bool
-	@State private var dragOffset: CGSize = .zero
+	@State private var isPressed = false
+	@State private var isExpanded = false
+	@State private var isIconVisible = false
+	@State private var dragOffset = CGSize.zero
 
 	private let dragInWrongDirectionMultiplier: Double = 0.028
 	private let dragThreshold: Double = 20
@@ -39,7 +40,7 @@ struct IndicatorView: View {
 			return 6
 		}
 		if indicator.subtitle != nil {
-			return 14
+			return 12
 		}
 		return 6
 	}
@@ -51,7 +52,7 @@ struct IndicatorView: View {
 		if indicator.subtitle != nil {
 			return 26
 		}
-		return 14
+		return 18
 	}
 	private var paddingVertical: Double {
 		if isExpanded {
@@ -60,7 +61,7 @@ struct IndicatorView: View {
 		if indicator.subtitle != nil {
 			return 12
 		}
-		return 10
+		return 12
 	}
 
 	private var iconFont: Font {
@@ -104,24 +105,23 @@ struct IndicatorView: View {
 	init(
 		indicator: Indicator,
 		onDismiss: (() -> Void)? = nil,
-		onExpandedToggle: ((Bool) -> Void)? = nil
+		onToggleExpansion: ((Bool) -> Void)? = nil
 	) {
 		self.indicator = indicator
 		self.onDismiss = onDismiss
-		self.onExpandedToggle = onExpandedToggle
-		self._isExpanded = .init(initialValue: false)
+		self.onToggleExpansion = onToggleExpansion
 	}
 
 	#if DEBUG
 	init(
 		indicator: Indicator,
 		onDismiss: (() -> Void)? = nil,
-		onExpandedToggle: ((Bool) -> Void)? = nil,
+		onToggleExpansion: ((Bool) -> Void)? = nil,
 		isExpanded: Bool = false
 	) {
 		self.indicator = indicator
 		self.onDismiss = onDismiss
-		self.onExpandedToggle = onExpandedToggle
+		self.onToggleExpansion = onToggleExpansion
 		self._isExpanded = .init(initialValue: isExpanded)
 	}
 	#endif
@@ -134,21 +134,27 @@ struct IndicatorView: View {
 						switch icon {
 						case .image(let image):
 							image
+								.onAppear { isIconVisible = false }
 						case .systemImage(let systemName):
 							Image(systemName: systemName)
 								.font(iconFont)
 								.fontWeight(.medium)
-								.foregroundStyle(indicator.style.iconStyle)
+//								.foregroundStyle(indicator.style.iconStyle)
 								.foregroundColor(indicator.style.tintColor)
 								.symbolRenderingMode(.hierarchical)
-//								.geometryGroup()
+								.symbolEffect(.bounce, options: .nonRepeating, value: isIconVisible)
+//								.transition(.symbolEffect(.appear))
+								.onAppear { isIconVisible = true }
+								.onDisappear { isIconVisible = false }
 						case .progressIndicator:
 							ProgressView()
 								#if os(macOS)
 								.controlSize(.small)
 								#endif
+								.onAppear { isIconVisible = false }
 						}
 					}
+					.geometryGroup()
 					.padding(.leading, -2)
 					.id(ViewID.iconView)
 				}
@@ -160,11 +166,12 @@ struct IndicatorView: View {
 						.lineLimit(isExpanded ? 2 : 1)
 						.foregroundStyle(.primary)
 						.foregroundColor(indicator.style.tintColor)
-//						.geometryGroup()
 						.frame(
 							maxWidth: isExpanded ? .infinity : nil,
 							alignment: isExpanded ? .leading : .center
 						)
+						.fixedSize(horizontal: !isExpanded && indicator.title.count < 16, vertical: false)
+						.geometryGroup()
 						.id(ViewID.titleLabel)
 
 					if !isExpanded, let content = indicator.subtitle {
@@ -173,7 +180,6 @@ struct IndicatorView: View {
 							.fontWeight(.medium)
 							.lineLimit(2)
 							.foregroundStyle(.secondary)
-//							.geometryGroup()
 							.matchedGeometryEffect(
 								id: AnimationID.subtitleOrExpandedTextLabel,
 								in: animationNamespace,
@@ -193,7 +199,6 @@ struct IndicatorView: View {
 					.fontWeight(.medium)
 					.foregroundStyle(.secondary)
 					.frame(maxWidth: .infinity, alignment: .leading)
-//					.geometryGroup()
 					.matchedGeometryEffect(
 						id: AnimationID.subtitleOrExpandedTextLabel,
 						in: animationNamespace,
@@ -207,6 +212,7 @@ struct IndicatorView: View {
 		.padding(.horizontal, paddingHorizontal)
 		.padding(.vertical, paddingVertical)
 		.frame(minWidth: minWidth)
+		.geometryGroup()
 		.background(.regularMaterial, in: backgroundShape)
 		.mask(backgroundShape)
 		.scaleEffect(isPressed ? 0.96 : 1)
@@ -241,7 +247,7 @@ private extension IndicatorView {
 		}
 
 		isExpanded.toggle()
-		onExpandedToggle?(isExpanded)
+		onToggleExpansion?(isExpanded)
 	}
 
 	func didTapIndicator() {

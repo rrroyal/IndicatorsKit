@@ -18,7 +18,7 @@ public struct Indicator {
 	public var expandedText: String?
 	public var dismissType: DismissType
 	public var style: Style
-	public var action: ActionStyle?
+	public var action: ActionType?
 
 	public init(
 		id: String,
@@ -28,7 +28,7 @@ public struct Indicator {
 		expandedText: String? = nil,
 		dismissType: DismissType = .automatic,
 		style: Style = .default,
-		action: ActionStyle? = nil
+		action: ActionType? = nil
 	) {
 		self.id = id
 		self.icon = icon
@@ -60,7 +60,7 @@ extension Indicator: Hashable {
 // MARK: - Indicator+
 
 public extension Indicator {
-	enum ActionStyle {
+	enum ActionType {
 		case toggleExpansion
 		case execute(() -> Void)
 	}
@@ -72,7 +72,7 @@ public extension Indicator {
 		public static let automatic: DismissType = .after(5)
 	}
 
-	enum Icon {
+	enum Icon: Equatable {
 		case image(Image)
 		case systemImage(String)
 		case progressIndicator
@@ -103,13 +103,13 @@ public extension Indicator {
 #if DEBUG
 internal extension Indicator {
 	private static let _id = "id"
-	private static let _icon = Icon.systemImage("command")
+	private static let _icon = Icon.systemImage("rectangle.arrowtriangle.2.inward")
 	private static let _title = "Title"
 	private static let _subtitle = "Subtitle"
 	private static let _expandedText = "Expanded text, that will be longer. It could be a readable description of some error, or some other longer tooltip. The choice is yours."
 	private static let _dismissType = DismissType.manual
 	private static let _style = Style.default
-	private static let _action = ActionStyle.toggleExpansion
+	private static let _action = ActionType.toggleExpansion
 
 	static let allCases: [Indicator] = [
 		.title,
