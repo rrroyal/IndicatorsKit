@@ -65,7 +65,7 @@ public extension Indicator {
 		case execute(() -> Void)
 	}
 
-	enum DismissType: Equatable {
+	enum DismissType: Equatable, Sendable {
 		case manual
 		case after(TimeInterval)
 
@@ -78,7 +78,7 @@ public extension Indicator {
 		case progressIndicator
 	}
 
-	struct Style {
+	struct Style: Sendable {
 		public static let `default` = Style()
 		public static let error = Style(
 			iconStyle: .primary,

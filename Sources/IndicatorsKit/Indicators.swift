@@ -10,7 +10,7 @@ import SwiftUI
 // MARK: - Indicators
 
 @Observable
-public final class Indicators {
+public final class Indicators: Sendable {
 	internal static let animation: Animation = .smooth
 
 	public private(set) var indicators: [Indicator] = []
