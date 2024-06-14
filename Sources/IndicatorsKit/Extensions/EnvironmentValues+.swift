@@ -8,7 +8,7 @@
 import SwiftUI
 
 public extension EnvironmentValues {
-	/// Enable Haptic Feedback for Indicator interactions.
+	/// A Boolean value indicating if Haptic Feedback is enabled for for indicator interactions.
 	@Entry
-	public var ikEnableHaptics: Bool = true
+	var ikEnableHaptics: Bool = true
 }

@@ -10,19 +10,26 @@ import SwiftUI
 // MARK: - Indicators
 
 @Observable
-public final class Indicators: Sendable {
+public final class Indicators: @unchecked Sendable {
 	internal static let animation: Animation = .smooth
 
+	@MainActor
 	public private(set) var indicators: [Indicator] = []
 
+	@ObservationIgnored
 	internal var timers: [Indicator.ID: Timer] = [:]
 
 	public init() { }
 
+	@MainActor
 	public func display(_ indicator: Indicator) {
+		var indicator = indicator
+		indicator.presentedAt = .now
+
 		withAnimation(Self.animation) {
 			if let alreadyExistingIndex = indicators.firstIndex(where: { $0.id == indicator.id }) {
 				indicators[alreadyExistingIndex] = indicator
+				indicators.move(fromOffsets: .init(integer: alreadyExistingIndex), toOffset: indicators.endIndex)
 			} else {
 				indicators.append(indicator)
 			}
@@ -79,7 +86,7 @@ internal extension Indicators {
 		Task {
 			try? await Task.sleep(for: .seconds(1))
 			for indicator in indicators {
-				model.display(indicator)
+				await model.display(indicator)
 				try? await Task.sleep(for: .seconds(interval))
 			}
 		}

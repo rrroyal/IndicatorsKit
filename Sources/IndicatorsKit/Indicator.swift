@@ -9,7 +9,7 @@ import SwiftUI
 
 // MARK: - Indicator
 
-public struct Indicator {
+public struct Indicator: Sendable {
 	public let id: String
 
 	public var icon: Icon?
@@ -19,6 +19,8 @@ public struct Indicator {
 	public var dismissType: DismissType
 	public var style: Style
 	public var action: ActionType?
+
+	internal var presentedAt: Date?
 
 	public init(
 		id: String,
@@ -60,9 +62,9 @@ extension Indicator: Hashable {
 // MARK: - Indicator+
 
 public extension Indicator {
-	enum ActionType {
+	enum ActionType: Sendable {
 		case toggleExpansion
-		case execute(() -> Void)
+		case execute(@Sendable () -> Void)
 	}
 
 	enum DismissType: Equatable, Sendable {
@@ -72,7 +74,7 @@ public extension Indicator {
 		public static let automatic: DismissType = .after(5)
 	}
 
-	enum Icon: Equatable {
+	enum Icon: Equatable, Sendable {
 		case image(Image)
 		case systemImage(String)
 		case progressIndicator

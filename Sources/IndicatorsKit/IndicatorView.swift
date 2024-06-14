@@ -143,6 +143,7 @@ struct IndicatorView: View {
 								.foregroundColor(indicator.style.tintColor)
 								.symbolRenderingMode(.hierarchical)
 								.symbolEffect(.bounce, options: .nonRepeating, value: isIconVisible)
+								.symbolEffect(.bounce, options: .nonRepeating, value: indicator.presentedAt)
 //								.transition(.symbolEffect(.appear))
 								.onAppear { isIconVisible = true }
 								.onDisappear { isIconVisible = false }
@@ -154,7 +155,8 @@ struct IndicatorView: View {
 								.onAppear { isIconVisible = false }
 						}
 					}
-					.geometryGroup()
+					.contentTransition(.symbolEffect(.replace.magic(fallback: .replace)))
+//					.geometryGroup()
 					.padding(.leading, -2)
 					.id(ViewID.iconView)
 				}
@@ -234,7 +236,7 @@ struct IndicatorView: View {
 
 // MARK: - IndicatorView+Identifiable
 
-extension IndicatorView: Identifiable {
+extension IndicatorView {
 	var id: String { indicator.id }
 }
 

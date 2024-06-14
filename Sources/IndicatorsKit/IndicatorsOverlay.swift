@@ -70,7 +70,7 @@ private extension IndicatorsOverlay {
 
 	func scale(for index: Int, indicatorsCount: Int) -> Double {
 		let indexFlipped = Double(indicatorsCount - index) - 1
-		return 1 - (indexFlipped * 0.2)
+		return 1 - (indexFlipped * 0.12)
 	}
 }
 
