@@ -84,22 +84,22 @@ private extension IndicatorsOverlay {
 
 // MARK: - Previews
 
-#if DEBUG
 #Preview {
+	let indicator1a = Indicator(id: "i1", icon: .progressIndicator, title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .manual)
+	let indicator1b = Indicator(id: "i1", icon: .systemImage("rectangle.arrowtriangle.2.inward"), title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .automatic)
+	let indicator2a = Indicator(id: "i2", icon: .progressIndicator, title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .manual)
+	let indicator2b = Indicator(id: "i2", icon: .systemImage("rectangle.arrowtriangle.2.inward"), title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .automatic)
+
 	IndicatorsOverlay(
 		model: .preview(
 			indicators: [
-				.init(id: "i1", icon: .progressIndicator, title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .manual),
-				.init(id: "i1", icon: .systemImage("rectangle.arrowtriangle.2.inward"), title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .automatic),
-				.init(id: "i2", icon: .progressIndicator, title: "Indicator 2", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .manual),
-				.init(id: "i2", icon: .systemImage("rectangle.arrowtriangle.2.inward"), title: "Indicator 2", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .automatic),
+				indicator1a,
+				indicator1b,
+				indicator2a,
+				indicator2b
 			]
 		)
 	)
-	#if os(iOS)
-	.frame(maxHeight: .infinity, alignment: .top)
-	#elseif os(macOS)
 	.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-	#endif
+	.background(LinearGradient(colors: [.red, .green, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
 }
-#endif

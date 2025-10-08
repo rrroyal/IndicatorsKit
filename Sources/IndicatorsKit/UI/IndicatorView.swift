@@ -215,8 +215,8 @@ struct IndicatorView: View {
 		.padding(.vertical, paddingVertical)
 		.frame(minWidth: minWidth)
 		.geometryGroup()
-		.background(.regularMaterial, in: backgroundShape)
 		.mask(backgroundShape)
+		.modifier(IndicatorBackgroundViewModifier(shape: backgroundShape))
 		.scaleEffect(isPressed ? 0.96 : 1)
 		.offset(dragOffset)
 		.shadow(color: .black.opacity(0.14), radius: 10, x: 0, y: 0)
@@ -289,25 +289,37 @@ private extension IndicatorView {
 #if DEBUG
 #Preview("Title", traits: .sizeThatFitsLayout) {
 	IndicatorView(indicator: .title)
+		.padding()
+		.background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
 }
 
 #Preview("Icon + Title", traits: .sizeThatFitsLayout) {
 	IndicatorView(indicator: .titleIcon)
+		.padding()
+		.background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
 }
 
 #Preview("Title + Subtitle", traits: .sizeThatFitsLayout) {
 	IndicatorView(indicator: .titleSubtitleExpanded)
+		.padding()
+		.background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
 }
 
 #Preview("Icon + Title + Subtitle", traits: .sizeThatFitsLayout) {
 	IndicatorView(indicator: .titleSubtitleExpandedIcon)
+		.padding()
+		.background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
 }
 
 #Preview("Title + Subtitle (Expanded)", traits: .sizeThatFitsLayout) {
 	IndicatorView(indicator: .titleSubtitleExpanded, isExpanded: true)
+		.padding()
+		.background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
 }
 
 #Preview("Icon + Title + Subtitle (Expanded)", traits: .sizeThatFitsLayout) {
 	IndicatorView(indicator: .titleSubtitleExpandedIcon, isExpanded: true)
+		.padding()
+		.background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
 }
 #endif
