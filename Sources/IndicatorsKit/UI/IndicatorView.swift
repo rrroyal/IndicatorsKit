@@ -11,8 +11,8 @@ import SwiftUI
 
 struct IndicatorView: View {
 	var indicator: Indicator
-	var onDismiss: (() -> Void)?
-	var onToggleExpansion: ((Bool) -> Void)?
+	var dismissAction: () -> Void
+	var toggleExpansionAction: (Bool) -> Void
 
 	@Namespace private var animationNamespace
 
@@ -20,66 +20,6 @@ struct IndicatorView: View {
 	@State private var isExpanded = false
 	@State private var isIconVisible = false
 	@State private var dragOffset = CGSize.zero
-
-	private let dragInWrongDirectionMultiplier: Double = 0.028
-	private let dragThreshold: Double = 20
-
-	private let backgroundShape: some Shape = RoundedRectangle(cornerRadius: 28, style: .circular)
-
-	private var minWidth: Double {
-		if indicator.subtitle != nil {
-			return 112
-		}
-		return 64
-	}
-	private let maxWidth: Double = 300
-
-	private let spacingVertical: Double = 8
-	private var spacingHorizontal: Double {
-		if isExpanded {
-			return 6
-		}
-		if indicator.subtitle != nil {
-			return 12
-		}
-		return 6
-	}
-
-	private var paddingHorizontal: Double {
-		if isExpanded {
-			return paddingVertical
-		}
-		if indicator.subtitle != nil {
-			return 26
-		}
-		return 18
-	}
-	private var paddingVertical: Double {
-		if isExpanded {
-			return 18
-		}
-		if indicator.subtitle != nil {
-			return 12
-		}
-		return 12
-	}
-
-	private var iconFont: Font {
-		if isExpanded {
-			return titleFont
-		}
-		if indicator.subtitle != nil {
-			return .title2
-		}
-		return .footnote
-	}
-
-	private var titleFont: Font {
-		if isExpanded {
-			return .title3
-		}
-		return .footnote
-	}
 
 	private var dragGesture: some Gesture {
 		DragGesture()
@@ -93,7 +33,7 @@ struct IndicatorView: View {
 				}
 
 				if $0.translation.height < dragThreshold {
-					onDismiss?()
+					dismissAction()
 				} else if $0.translation.height > 0 {
 					if indicator.expandedText != nil {
 						toggleExpansionIfPossible()
@@ -104,25 +44,25 @@ struct IndicatorView: View {
 
 	init(
 		indicator: Indicator,
-		onDismiss: (() -> Void)? = nil,
-		onToggleExpansion: ((Bool) -> Void)? = nil
+		dismissAction: @escaping () -> Void,
+		toggleExpansionAction: @escaping (Bool) -> Void
 	) {
 		self.indicator = indicator
-		self.onDismiss = onDismiss
-		self.onToggleExpansion = onToggleExpansion
+		self.dismissAction = dismissAction
+		self.toggleExpansionAction = toggleExpansionAction
 	}
 
 	#if DEBUG
 	init(
 		indicator: Indicator,
-		onDismiss: (() -> Void)? = nil,
-		onToggleExpansion: ((Bool) -> Void)? = nil,
+		dismissAction: @escaping () -> Void = {},
+		toggleExpansionAction: @escaping (Bool) -> Void = { _ in },
 		isExpanded: Bool = false
 	) {
 		self.indicator = indicator
-		self.onDismiss = onDismiss
-		self.onToggleExpansion = onToggleExpansion
-		self._isExpanded = .init(initialValue: isExpanded)
+		self.dismissAction = dismissAction
+		self.toggleExpansionAction = toggleExpansionAction
+		self.isExpanded = isExpanded
 	}
 	#endif
 
@@ -234,13 +174,80 @@ struct IndicatorView: View {
 	}
 }
 
-// MARK: - IndicatorView+Identifiable
+// MARK: - Identifiable
 
 extension IndicatorView {
 	var id: String { indicator.id }
 }
 
-// MARK: - IndicatorView+Private
+// MARK: - UI
+
+private extension IndicatorView {
+	var dragInWrongDirectionMultiplier: Double { 0.028 }
+	var dragThreshold: Double { 20 }
+
+	var backgroundShape: some Shape { RoundedRectangle(cornerRadius: 28, style: .circular) }
+
+	var minWidth: Double {
+		if indicator.subtitle != nil {
+			return 112
+		}
+		return 64
+	}
+
+	var maxWidth: Double { 300 }
+
+	var spacingVertical: Double { 8 }
+
+	var spacingHorizontal: Double {
+		if isExpanded {
+			return 6
+		}
+		if indicator.subtitle != nil {
+			return 12
+		}
+		return 6
+	}
+
+	var paddingHorizontal: Double {
+		if isExpanded {
+			return paddingVertical
+		}
+		if indicator.subtitle != nil {
+			return 26
+		}
+		return 18
+	}
+
+	var paddingVertical: Double {
+		if isExpanded {
+			return 18
+		}
+		if indicator.subtitle != nil {
+			return 12
+		}
+		return 12
+	}
+
+	var iconFont: Font {
+		if isExpanded {
+			return titleFont
+		}
+		if indicator.subtitle != nil {
+			return .title2
+		}
+		return .footnote
+	}
+
+	var titleFont: Font {
+		if isExpanded {
+			return .title3
+		}
+		return .footnote
+	}
+}
+
+// MARK: - Actions
 
 private extension IndicatorView {
 	func toggleExpansionIfPossible() {
@@ -249,7 +256,7 @@ private extension IndicatorView {
 		}
 
 		isExpanded.toggle()
-		onToggleExpansion?(isExpanded)
+		toggleExpansionAction(isExpanded)
 	}
 
 	func didTapIndicator() {
@@ -265,7 +272,7 @@ private extension IndicatorView {
 	}
 }
 
-// MARK: - IndicatorView+ViewID
+// MARK: - ViewID
 
 private extension IndicatorView {
 	enum ViewID: String {
@@ -276,7 +283,7 @@ private extension IndicatorView {
 	}
 }
 
-// MARK: - IndicatorView+AnimationID
+// MARK: - AnimationID
 
 private extension IndicatorView {
 	enum AnimationID: String {

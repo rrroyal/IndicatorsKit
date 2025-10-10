@@ -27,8 +27,8 @@ public struct IndicatorsOverlay: View {
 			ForEach(Array(model.indicators.enumerated()), id: \.element.id) { index, indicator in
 				IndicatorView(
 					indicator: indicator,
-					onDismiss: { onDismiss(indicator) },
-					onToggleExpansion: { onToggleExpansion(indicator, isExpanded: $0) }
+					dismissAction: { onDismiss(indicator) },
+					toggleExpansionAction: { onToggleExpansion(indicator, isExpanded: $0) }
 				)
 				.scaleEffect(scale(for: index, indicatorsCount: indicatorsCount))
 				.padding(.horizontal)
@@ -46,9 +46,15 @@ public struct IndicatorsOverlay: View {
 	}
 }
 
-// MARK: - IndicatorsOverlay+Private
+// MARK: - Actions
 
 private extension IndicatorsOverlay {
+	@MainActor
+	func onDismiss(_ indicator: Indicator) {
+		model.dismiss(indicator)
+	}
+
+	@MainActor
 	func onToggleExpansion(_ indicator: Indicator, isExpanded: Bool) {
 		#if canImport(UIKit)
 		if enableHaptics {
@@ -63,18 +69,13 @@ private extension IndicatorsOverlay {
 		}
 	}
 
-	@MainActor
-	func onDismiss(_ indicator: Indicator) {
-		model.dismiss(indicator)
-	}
-
 	func scale(for index: Int, indicatorsCount: Int) -> Double {
 		let indexFlipped = Double(indicatorsCount - index) - 1
 		return 1 - (indexFlipped * 0.12)
 	}
 }
 
-// MARK: - IndicatorsOverlay+ViewID
+// MARK: - ViewID
 
 private extension IndicatorsOverlay {
 	enum ViewID: String {

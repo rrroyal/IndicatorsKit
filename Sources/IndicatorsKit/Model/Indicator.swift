@@ -123,55 +123,55 @@ internal extension Indicator {
 	]
 
 	static let title = Indicator(
-		id: Self._id,
-		title: Self._title,
-		dismissType: Self._dismissType,
-		style: Self._style,
-		action: Self._action
+		id: _id,
+		title: _title,
+		dismissType: _dismissType,
+		style: _style,
+		action: _action
 	)
 	static let titleIcon = Indicator(
-		id: Self._id,
-		icon: Self._icon,
-		title: Self._title,
-		dismissType: Self._dismissType,
-		style: Self._style,
-		action: Self._action
+		id: _id,
+		icon: _icon,
+		title: _title,
+		dismissType: _dismissType,
+		style: _style,
+		action: _action
 	)
 	static let titleSubtitle = Indicator(
-		id: Self._id,
-		title: Self._title,
-		subtitle: Self._subtitle,
-		dismissType: Self._dismissType,
-		style: Self._style,
-		action: Self._action
+		id: _id,
+		title: _title,
+		subtitle: _subtitle,
+		dismissType: _dismissType,
+		style: _style,
+		action: _action
 	)
 	static let titleSubtitleIcon = Indicator(
-		id: Self._id,
-		icon: Self._icon,
-		title: Self._title,
-		subtitle: Self._subtitle,
-		dismissType: Self._dismissType,
-		style: Self._style,
-		action: Self._action
+		id: _id,
+		icon: _icon,
+		title: _title,
+		subtitle: _subtitle,
+		dismissType: _dismissType,
+		style: _style,
+		action: _action
 	)
 	static let titleSubtitleExpanded = Indicator(
-		id: Self._id,
-		title: Self._title,
-		subtitle: Self._subtitle,
-		expandedText: Self._expandedText,
-		dismissType: Self._dismissType,
-		style: Self._style,
-		action: Self._action
+		id: _id,
+		title: _title,
+		subtitle: _subtitle,
+		expandedText: _expandedText,
+		dismissType: _dismissType,
+		style: _style,
+		action: _action
 	)
 	static let titleSubtitleExpandedIcon = Indicator(
-		id: Self._id,
-		icon: Self._icon,
-		title: Self._title,
-		subtitle: Self._subtitle,
-		expandedText: Self._expandedText,
-		dismissType: Self._dismissType,
-		style: Self._style,
-		action: Self._action
+		id: _id,
+		icon: _icon,
+		title: _title,
+		subtitle: _subtitle,
+		expandedText: _expandedText,
+		dismissType: _dismissType,
+		style: _style,
+		action: _action
 	)
 }
 #endif
