@@ -85,6 +85,7 @@ private extension IndicatorsOverlay {
 
 // MARK: - Previews
 
+#if DEBUG
 #Preview {
 	let indicator1a = Indicator(id: "i1", icon: .progressIndicator, title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .manual)
 	let indicator1b = Indicator(id: "i1", icon: .systemImage("rectangle.arrowtriangle.2.inward"), title: "Indicator 1", subtitle: "Indicator Subtitle", expandedText: "Expanded Text", dismissType: .automatic)
@@ -104,3 +105,4 @@ private extension IndicatorsOverlay {
 	.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
 	.background(LinearGradient(colors: [.red, .green, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
 }
+#endif
