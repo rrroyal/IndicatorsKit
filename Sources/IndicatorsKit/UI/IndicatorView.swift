@@ -156,6 +156,7 @@ struct IndicatorView: View {
 		.frame(minWidth: minWidth)
 		.geometryGroup()
 		.mask(backgroundShape)
+		.contentShape(backgroundShape)
 		.modifier(IndicatorBackgroundViewModifier(shape: backgroundShape))
 		.scaleEffect(isPressed ? 0.96 : 1)
 		.offset(dragOffset)
