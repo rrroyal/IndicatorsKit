@@ -22,8 +22,8 @@ public struct IndicatorsOverlay: View {
 	}
 
 	public var body: some View {
+		let indicatorsCount = model.indicators.count
 		ZStack {
-			let indicatorsCount = model.indicators.count
 			ForEach(Array(model.indicators.enumerated()), id: \.element.id) { index, indicator in
 				IndicatorView(
 					indicator: indicator,
@@ -33,16 +33,11 @@ public struct IndicatorsOverlay: View {
 				.scaleEffect(scale(for: index, indicatorsCount: indicatorsCount))
 				.padding(.horizontal)
 				.padding(insets)
-				.transition(
-					.asymmetric(
-						insertion: .move(edge: .top),
-						removal: .move(edge: .top).combined(with: .opacity)
-					)
-				)
+				.transition(.move(edge: .top).combined(with: .opacity))
 				.zIndex(Double(index))
 			}
 		}
-		.id(ViewID.indicatorsOverlayView)
+		.animation(.smooth, value: indicatorsCount)
 	}
 }
 
@@ -72,14 +67,6 @@ private extension IndicatorsOverlay {
 	func scale(for index: Int, indicatorsCount: Int) -> Double {
 		let indexFlipped = Double(indicatorsCount - index) - 1
 		return 1 - (indexFlipped * 0.12)
-	}
-}
-
-// MARK: - ViewID
-
-private extension IndicatorsOverlay {
-	enum ViewID: String {
-		case indicatorsOverlayView = "IndicatorsOverlayView"
 	}
 }
 
