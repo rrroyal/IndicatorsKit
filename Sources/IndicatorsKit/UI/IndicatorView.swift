@@ -294,39 +294,13 @@ private extension IndicatorView {
 
 // MARK: - Previews
 
-#if DEBUG
-#Preview("Title", traits: .sizeThatFitsLayout) {
-	IndicatorView(indicator: .title)
-		.padding()
-		.background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
-}
-
-#Preview("Icon + Title", traits: .sizeThatFitsLayout) {
-	IndicatorView(indicator: .titleIcon)
-		.padding()
-		.background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
-}
-
-#Preview("Title + Subtitle", traits: .sizeThatFitsLayout) {
-	IndicatorView(indicator: .titleSubtitleExpanded)
-		.padding()
-		.background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
-}
-
-#Preview("Icon + Title + Subtitle", traits: .sizeThatFitsLayout) {
-	IndicatorView(indicator: .titleSubtitleExpandedIcon)
-		.padding()
-		.background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
-}
-
-#Preview("Title + Subtitle (Expanded)", traits: .sizeThatFitsLayout) {
-	IndicatorView(indicator: .titleSubtitleExpanded, isExpanded: true)
-		.padding()
-		.background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
-}
-
-#Preview("Icon + Title + Subtitle (Expanded)", traits: .sizeThatFitsLayout) {
-	IndicatorView(indicator: .titleSubtitleExpandedIcon, isExpanded: true)
+#if DEBUG && canImport(SwiftUI, _version: 8.0.84)
+@available(iOS 26.0, macOS 27.0, *)
+#Preview(
+	traits: .sizeThatFitsLayout,
+	arguments: Indicator.allPreviewCases
+) { indicator in
+	IndicatorView(indicator: indicator)
 		.padding()
 		.background(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
 }

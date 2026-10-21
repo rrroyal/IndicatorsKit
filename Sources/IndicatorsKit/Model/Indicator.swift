@@ -104,74 +104,58 @@ public extension Indicator {
 
 #if DEBUG
 internal extension Indicator {
-	private static let _id = "id"
-	private static let _icon = Icon.systemImage("rectangle.arrowtriangle.2.inward")
-	private static let _title = "Title"
-	private static let _subtitle = "Subtitle"
-	private static let _expandedText = "Expanded text, that will be longer. It could be a readable description of some error, or some other longer tooltip. The choice is yours."
-	private static let _dismissType = DismissType.manual
-	private static let _style = Style.default
-	private static let _action = ActionType.toggleExpansion
+	static let preview: Indicator = .init(id: "id", title: "Title")
 
-	static let allCases: [Indicator] = [
-		.title,
-		.titleIcon,
-		.titleSubtitle,
-		.titleSubtitleIcon,
-		.titleSubtitleExpanded,
-		.titleSubtitleExpandedIcon,
+	static let allPreviewCases: [Self] = [
+		.preview,
+		.preview._icon(),
+		.preview._icon(.progressIndicator),
+		.preview._icon()._subtitle(),
+		.preview._icon(.progressIndicator)._subtitle(),
+		.preview._icon()._subtitle()._expandedText(),
+		.preview._icon()._subtitle()._style(.error)
 	]
 
-	static let title = Indicator(
-		id: _id,
-		title: _title,
-		dismissType: _dismissType,
-		style: _style,
-		action: _action
-	)
-	static let titleIcon = Indicator(
-		id: _id,
-		icon: _icon,
-		title: _title,
-		dismissType: _dismissType,
-		style: _style,
-		action: _action
-	)
-	static let titleSubtitle = Indicator(
-		id: _id,
-		title: _title,
-		subtitle: _subtitle,
-		dismissType: _dismissType,
-		style: _style,
-		action: _action
-	)
-	static let titleSubtitleIcon = Indicator(
-		id: _id,
-		icon: _icon,
-		title: _title,
-		subtitle: _subtitle,
-		dismissType: _dismissType,
-		style: _style,
-		action: _action
-	)
-	static let titleSubtitleExpanded = Indicator(
-		id: _id,
-		title: _title,
-		subtitle: _subtitle,
-		expandedText: _expandedText,
-		dismissType: _dismissType,
-		style: _style,
-		action: _action
-	)
-	static let titleSubtitleExpandedIcon = Indicator(
-		id: _id,
-		icon: _icon,
-		title: _title,
-		subtitle: _subtitle,
-		expandedText: _expandedText,
-		dismissType: _dismissType,
-		style: _style,
-		action: _action
-	)
+	func _icon(_ icon: Indicator.Icon = .systemImage("rectangle.arrowtriangle.2.inward")) -> Self {
+		var s = self
+		s.icon = icon
+		return s
+	}
+
+	func _title(_ title: String = "Title") -> Self {
+		var s = self
+		s.title = title
+		return s
+	}
+
+	func _subtitle(_ subtitle: String = "Subtitle") -> Self {
+		var s = self
+		s.subtitle = subtitle
+		return s
+	}
+
+	func _expandedText(_ expandedText: String = "Expanded text, that will be longer. It could be a readable description of some error, or some other longer tooltip. The choice is yours.") -> Self {
+		var s = self
+		s.expandedText = expandedText
+		return s
+	}
+
+	func _dismissType(_ dismissType: DismissType = .manual) -> Self {
+		var s = self
+		s.dismissType = dismissType
+		return s
+	}
+
+	func _style(_ style: Style = .default) -> Self {
+		var s = self
+		s.style = style
+		return s
+	}
+
+	func _action(_ action: ActionType = .toggleExpansion) -> Self {
+		var s = self
+		s.action = action
+		return s
+	}
 }
 #endif
