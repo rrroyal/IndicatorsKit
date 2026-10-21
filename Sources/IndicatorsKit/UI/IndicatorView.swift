@@ -91,6 +91,8 @@ struct IndicatorView: View {
 							ProgressView()
 								#if os(macOS)
 								.controlSize(.small)
+								#elseif os(iOS)
+								.controlSize(indicator.subtitle != nil || isExpanded ? .regular : .small)
 								#endif
 								.onAppear { isIconVisible = false }
 						}
