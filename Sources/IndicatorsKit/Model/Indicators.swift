@@ -62,7 +62,7 @@ internal extension Indicators {
 
 		if case .after(let time) = indicator.dismissType {
 			let timer = Timer.scheduledTimer(withTimeInterval: time, repeats: false) { _ in
-				Task { @MainActor [weak self] in
+				Task { @MainActor [weak self = self] in
 					self?.dismiss(indicator)
 				}
 			}
@@ -80,7 +80,7 @@ internal extension Indicators {
 
 #if DEBUG
 internal extension Indicators {
-	static func preview(indicators: [Indicator] = [.titleSubtitleExpandedIcon], interval: TimeInterval = 2) -> Indicators {
+	static func preview(indicators: [Indicator] = [.preview], interval: TimeInterval = 2) -> Indicators {
 		let model = Indicators()
 
 		Task {
